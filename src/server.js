@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import { createClient } from '@supabase/supabase-js';
+import cron from 'node-cron';
 
 const fastify = Fastify({ logger: true });
 
@@ -12,6 +13,21 @@ if (!supabaseUrl || !supabasePublishableKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabasePublishableKey);
+
+cron.schedule('0 0 * * *', async () => {
+  const start = Date.now();
+  try {
+    const { data, error } = await supabase.from('product_requests').select('*').limit(2);
+    const latency = Date.now() - start;
+    if (error) {
+      fastify.log.error({ success: false, error: error.message, latency_ms: latency }, 'Cron ping failed');
+    } else {
+      fastify.log.info({ success: true, latency_ms: latency }, 'Cron ping succeeded');
+    }
+  } catch (err) {
+    fastify.log.error({ success: false, error: err.message }, 'Cron ping error');
+  }
+});
 
 fastify.get('/health', async () => {
   return { status: 'ok', timestamp: new Date().toISOString() };
