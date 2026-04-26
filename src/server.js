@@ -21,7 +21,7 @@ fastify.get('/ping', async (request, reply) => {
   const start = Date.now();
 
   try {
-    const { data, error, status } = await supabase.from('pg_catalog.pg_tables').select('tablename').limit(1);
+    const { data, error, status } = await supabase.from('product_requests').select('*').limit(2);
 
     if (error) {
       reply.code(503);
