@@ -15,10 +15,11 @@ COPY src ./src
 FROM base AS production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
+COPY package.json ./
 
 ENV NODE_ENV=production
 
-EXPOSE 3000
+EXPOSE 6929
 USER node
 
 CMD ["dumb-init", "node", "src/server.js"]
